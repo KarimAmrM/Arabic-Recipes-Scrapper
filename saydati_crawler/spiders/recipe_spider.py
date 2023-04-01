@@ -24,12 +24,14 @@ class RecipesSpider(scrapy.Spider):
     def parse_recipe(self, response, key):
         recipe_name = response.css('div.topper-title h1::text').get()
         recipe_description = response.css('div.intro-text p span::text').get()
+        if recipe_description is None:
+            recipe_description = response.css('div.intro-text::text').get()
         recipe_time = response.css('div.recipe-meta-data-info span::text').get()
         recipe_ingredients = response.css('div.ingredients-area::text').getall()
         recipe_steps = response.css('div.preparation-area ol li span::text').getall()
+        if len(recipe_steps) == 0:
+            recipe_steps = response.css('div.preparation-area p span::text').getall()
         recipe_tags = response.css('div.tags-area a::text').getall()
-        #recipe ingredients and steps are not extracted correctly 
-        #remove /n and /t from the lis
         recipe_ingredients = [i.strip() for i in recipe_ingredients if i.strip()]
         recipe = {
             'name': recipe_name,
